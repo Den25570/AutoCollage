@@ -17,11 +17,11 @@ namespace CollageApp
 
             for (int i = rect.Y; i < rect.Height; i+= tileSize)
             {
-                currBrush = i % 2 == 0 ? lightSolidBrush : darkSolidBrush;
+                currBrush = (i / tileSize) % 2 == 0 ? lightSolidBrush : darkSolidBrush;
                 for (int j = rect.X; j < rect.Width; j += tileSize)
                 {
                     currBrush = currBrush == lightSolidBrush ? darkSolidBrush : lightSolidBrush;
-                    graphics.FillRectangle(currBrush, rect.X + j * tileSize, rect.Y + i * tileSize, tileSize, tileSize);
+                    graphics.FillRectangle(currBrush, rect.X + j, rect.Y + i, tileSize, tileSize);
                 }
             }
         }

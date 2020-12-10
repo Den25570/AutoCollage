@@ -22,6 +22,7 @@ namespace CollageApp
         private GraphicsState buffer;
         private Pen borderPen;
         private bool notDragging = true;
+        private bool blockControlUpdating;
 
         public MainForm()
         {
@@ -45,9 +46,9 @@ namespace CollageApp
 
         private void panel1_Paint(object sender, PaintEventArgs e)
         {
-            TilePainter.DrawTiles(e.Graphics, new Rectangle(0,0,100,100), 20);
+            TilePainter.DrawTiles(e.Graphics, MainPanel.ClientRectangle, 20);
 
-           /* if (imageProcessor.SelectedImage != null && !notDragging && !saved)
+            if (imageProcessor.SelectedImage != null && !notDragging && !saved)
             {
                 imageProcessor.RenderImages(e.Graphics, template.TotalCells);             
                 saved = true;
@@ -64,7 +65,7 @@ namespace CollageApp
 
             template.DrawTemplate(e.Graphics);
             imageProcessor.DrawSelectedImage(e.Graphics);
-            imageProcessor.DrawSelectionRect(e.Graphics);      */ 
+            imageProcessor.DrawSelectionRect(e.Graphics);      
         }
 
         private void MainPanel_MouseDown(object sender, MouseEventArgs e)
@@ -91,7 +92,9 @@ namespace CollageApp
                 if (imageProcessor.PlaceImage(template.GetBlockIndex(e.Location)))
                 {
                     imageProcessor.SelectedImage = tmpImage;
+                    blockControlUpdating = true;
                     ImageSelected();
+                    blockControlUpdating = false;
                     notDragging = true;
                 }
                 updateField();
@@ -100,10 +103,11 @@ namespace CollageApp
 
         private void ImageSelected()
         {
-            XCut.Enabled = false;
-            YCut.Enabled = false;
-            WCut.Enabled = false;
-            HCut.Enabled = false;
+            XCut.Value = (decimal)Math.Ceiling(imageProcessor.SelectedImage.SrcRect.X);
+            YCut.Value = (decimal)Math.Ceiling(imageProcessor.SelectedImage.SrcRect.Y);
+            WCut.Value = (decimal)Math.Ceiling(imageProcessor.SelectedImage.SrcRect.Width);
+            HCut.Value = (decimal)Math.Ceiling(imageProcessor.SelectedImage.SrcRect.Height);
+
             switch (imageProcessor.SelectedImage.imageFormatType)
             {
                 case ImageFormatType.CutTopLeft:
@@ -117,10 +121,6 @@ namespace CollageApp
                     break;
                 case ImageFormatType.CustomCut:
                     cutCustomRadio.Checked = true;
-                    XCut.Enabled = true;
-                    YCut.Enabled = true;
-                    WCut.Enabled = true;
-                    HCut.Enabled = true;
                     break;
                 case ImageFormatType.Stretch:
                     stretchRadio.Checked = true;
@@ -131,11 +131,6 @@ namespace CollageApp
 
         private void UpdateCutValues()
         {
-            XCut.Value = (decimal)imageProcessor.SelectedImage.SrcRect.X;
-            YCut.Value = (decimal)imageProcessor.SelectedImage.SrcRect.Y;
-            WCut.Value = (decimal)imageProcessor.SelectedImage.SrcRect.Width;
-            HCut.Value = (decimal)imageProcessor.SelectedImage.SrcRect.Height;
-
             if (imageProcessor.SelectedImage.imageFormatType == ImageFormatType.CustomCut)
             {
                 XCut.Enabled = true;
@@ -180,13 +175,19 @@ namespace CollageApp
         {
             imageProcessor.Width = template.Columns * template.BlockWidth;
             imageProcessor.Height = template.Rows * template.BlockHeight;
+            template.fieldRect = MainPanel.ClientRectangle;
+            imageProcessor.fieldRectangle = MainPanel.ClientRectangle;
 
-            template.RearrangeImagesAccordingToTemplate(imageProcessor.Images, new Rectangle(0, 0, MainPanel.Width, MainPanel.Height));
+            template.RearrangeImagesAccordingToTemplate(imageProcessor.Images, MainPanel.ClientRectangle);
 
             imageProcessor.Multiplier = template.Multiplier;
 
             if (imageProcessor.SelectedImage != null)
             {
+                XCut.Value = (decimal)Math.Ceiling(imageProcessor.SelectedImage.SrcRect.X);
+                YCut.Value = (decimal)Math.Ceiling(imageProcessor.SelectedImage.SrcRect.Y);
+                WCut.Value = (decimal)Math.Ceiling(imageProcessor.SelectedImage.SrcRect.Width);
+                HCut.Value = (decimal)Math.Ceiling(imageProcessor.SelectedImage.SrcRect.Height);
                 UpdateCutValues();
             }
 
@@ -269,6 +270,7 @@ namespace CollageApp
         {
             if (imageProcessor.SelectedImage != null)
             {
+                TilePainter.DrawTiles(e.Graphics, previewPanel.ClientRectangle, 20);
                 imageProcessor.RenderPreview(e.Graphics, previewPanel.ClientRectangle);
             }
 
@@ -276,7 +278,7 @@ namespace CollageApp
 
         private void radioButton1_CheckedChanged(object sender, EventArgs e)
         {
-            if (imageProcessor.SelectedImage != null)
+            if (imageProcessor.SelectedImage != null && !blockControlUpdating)
             {
                 imageProcessor.SelectedImage.imageFormatType = ImageFormatType.Stretch;
                 updateField();
@@ -285,7 +287,7 @@ namespace CollageApp
 
         private void cutTopLeftRadio_CheckedChanged(object sender, EventArgs e)
         {
-            if (imageProcessor.SelectedImage != null)
+            if (imageProcessor.SelectedImage != null && !blockControlUpdating)
             {
                 imageProcessor.SelectedImage.imageFormatType = ImageFormatType.CutTopLeft;
                 updateField();
@@ -294,7 +296,7 @@ namespace CollageApp
 
         private void cutRightBottomRadio_CheckedChanged(object sender, EventArgs e)
         {
-            if (imageProcessor.SelectedImage != null)
+            if (imageProcessor.SelectedImage != null && !blockControlUpdating)
             {
                 imageProcessor.SelectedImage.imageFormatType = ImageFormatType.CutBotRight;
                 updateField();
@@ -303,7 +305,7 @@ namespace CollageApp
 
         private void cutMiddleRadio_CheckedChanged(object sender, EventArgs e)
         {
-            if (imageProcessor.SelectedImage != null)
+            if (imageProcessor.SelectedImage != null && !blockControlUpdating)
             {
                 imageProcessor.SelectedImage.imageFormatType = ImageFormatType.CutMiddle;
                 updateField();
@@ -312,7 +314,7 @@ namespace CollageApp
 
         private void cutCustomRadio_CheckedChanged(object sender, EventArgs e)
         {
-            if (imageProcessor.SelectedImage != null)
+            if (imageProcessor.SelectedImage != null && !blockControlUpdating)
             {
                 imageProcessor.SelectedImage.imageFormatType = ImageFormatType.CustomCut;
                 updateField();
@@ -351,7 +353,7 @@ namespace CollageApp
 
         private void XCut_ValueChanged(object sender, EventArgs e)
         {
-            if (imageProcessor.SelectedImage != null && imageProcessor.SelectedImage.imageFormatType == ImageFormatType.CustomCut)
+            if (imageProcessor.SelectedImage != null && imageProcessor.SelectedImage.imageFormatType == ImageFormatType.CustomCut && !blockControlUpdating)
             {
                 imageProcessor.SelectedImage.SrcRect.X = (int)XCut.Value;
                 updateField();
@@ -360,7 +362,7 @@ namespace CollageApp
 
         private void WCut_ValueChanged(object sender, EventArgs e)
         {
-            if (imageProcessor.SelectedImage != null && imageProcessor.SelectedImage.imageFormatType == ImageFormatType.CustomCut)
+            if (imageProcessor.SelectedImage != null && imageProcessor.SelectedImage.imageFormatType == ImageFormatType.CustomCut && !blockControlUpdating)
             {
                 imageProcessor.SelectedImage.SrcRect.Width = (int)WCut.Value;
                 updateField();
@@ -369,7 +371,7 @@ namespace CollageApp
 
         private void YCut_ValueChanged(object sender, EventArgs e)
         {
-            if (imageProcessor.SelectedImage != null && imageProcessor.SelectedImage.imageFormatType == ImageFormatType.CustomCut)
+            if (imageProcessor.SelectedImage != null && imageProcessor.SelectedImage.imageFormatType == ImageFormatType.CustomCut && !blockControlUpdating)
             {
                 imageProcessor.SelectedImage.SrcRect.Y = (int)YCut.Value;
                 updateField();
@@ -378,7 +380,7 @@ namespace CollageApp
 
         private void HCut_ValueChanged(object sender, EventArgs e)
         {
-            if (imageProcessor.SelectedImage != null && imageProcessor.SelectedImage.imageFormatType == ImageFormatType.CustomCut)
+            if (imageProcessor.SelectedImage != null && imageProcessor.SelectedImage.imageFormatType == ImageFormatType.CustomCut && !blockControlUpdating)
             {
                 imageProcessor.SelectedImage.SrcRect.Height = (int)HCut.Value;
                 updateField();

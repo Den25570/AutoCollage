@@ -11,6 +11,9 @@ namespace CollageApp
 {
     public class ImageProcessor
     {
+        public bool inCenter;
+        public Rectangle fieldRectangle;
+
         public List<Image> Images;
         public Image SelectedImage;
         public Point RelativeSelectedPoint;
@@ -80,9 +83,17 @@ namespace CollageApp
             {
                 float multiplier = SelectedImage.bitmap.Width > originalRect.Width ? originalRect.Width / (float)SelectedImage.bitmap.Width : 1;
                 multiplier = originalRect.Height / SelectedImage.bitmap.Height < multiplier ? originalRect.Height / (float)SelectedImage.bitmap.Height : multiplier;
-                graphics.DrawImage(SelectedImage.bitmap, 0, 0, SelectedImage.bitmap.Width * multiplier, SelectedImage.bitmap.Height * multiplier);
+                graphics.DrawImage(SelectedImage.bitmap,
+                    originalRect.Width / 2 - SelectedImage.bitmap.Width * multiplier/2,
+                    originalRect.Height / 2 - SelectedImage.bitmap.Height * multiplier / 2, 
+                    SelectedImage.bitmap.Width * multiplier, 
+                    SelectedImage.bitmap.Height * multiplier);
 
-                graphics.FillRectangle(cutFieldBrush, SelectedImage.SrcRect.X * multiplier, SelectedImage.SrcRect.Y * multiplier, SelectedImage.SrcRect.Width * multiplier, SelectedImage.SrcRect.Height * multiplier);
+                graphics.FillRectangle(cutFieldBrush, 
+                    SelectedImage.SrcRect.X * multiplier + originalRect.Width / 2 - SelectedImage.bitmap.Width * multiplier / 2, 
+                    SelectedImage.SrcRect.Y * multiplier + originalRect.Height / 2 - SelectedImage.bitmap.Height * multiplier / 2, 
+                    SelectedImage.SrcRect.Width * multiplier, 
+                    SelectedImage.SrcRect.Height * multiplier);
             }
         }
 

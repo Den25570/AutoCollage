@@ -9,6 +9,9 @@ namespace CollageApp.Templates
 {
     public class LinearTemplate : ITemplate
     {
+        public Rectangle fieldRect;
+        public bool inCenter = false;
+
         public int Rows = 3;
         public int Columns = 3;
         public int BlockWidth = 100;
@@ -62,7 +65,14 @@ namespace CollageApp.Templates
             {
                 for (int j = 0; j < Columns; j++)
                 {
-                    graphics.DrawRectangle(templatePen, j * blockWidth, i * blockHeight, blockWidth, blockHeight);
+                    float x = j * blockWidth;
+                    float y = i * blockHeight;
+                    if (inCenter)
+                    {
+                        x += fieldRect.Width / 2 - Columns * blockWidth / 2;
+                        y += fieldRect.Width / 2 - Columns * blockWidth / 2;
+                    }
+                    graphics.DrawRectangle(templatePen, x, y, blockWidth, blockHeight);
                 }
             }
         }
