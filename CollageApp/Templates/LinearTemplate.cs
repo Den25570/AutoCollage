@@ -14,6 +14,7 @@ namespace CollageApp.Templates
 
         public int Rows = 3;
         public int Columns = 3;
+
         public int BlockWidth = 100;
         public int BlockHeight = 100;
         public int TotalCells { get { return Rows* Columns; } }
@@ -23,6 +24,12 @@ namespace CollageApp.Templates
         private float blockHeight;
 
         private Pen templatePen = new Pen(Color.White);
+        private List<Block> blocks;
+
+        public void InitBlocks()
+        {
+
+        }
 
         public void RearrangeImagesAccordingToTemplate(IEnumerable<Image> images, Rectangle rect)
         {
