@@ -1,10 +1,12 @@
-﻿using System;
+﻿using CollageApp.Image;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace CollageApp
 {
@@ -17,7 +19,7 @@ namespace CollageApp
         Stretch
     }
 
-    public class Image
+    public class ImageInfo
     {
         public RectangleF OriginalRect;
         public RectangleF Rect;
@@ -26,13 +28,25 @@ namespace CollageApp
         public int Z;
         public string Name;
 
+        public bool isSelected = false;
+
         public Bitmap bitmap;
 
-        public Image(string path, int z)
+        public ImagePanel ImagePanel = new ImagePanel();
+
+        private Pen selectionPen = new Pen(Color.Blue, 4);
+
+        public ImageInfo(string path, int z)
         {
             try
             {
                 bitmap = new Bitmap(path);
+
+                ImagePanel.Visible = true;
+                ImagePanel.BackColor = System.Drawing.SystemColors.AppWorkspace;
+                ImagePanel.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+                ImagePanel.Name = "ImagePanel_" + z;
+                ImagePanel.Paint += panel_Paint;
             }
             catch (Exception e)
             {
@@ -40,13 +54,15 @@ namespace CollageApp
             }
 
             Name = Path.GetFileNameWithoutExtension(path);
-            this.Z = z;
-            Rect.Width = bitmap.Width;
-            Rect.Height = bitmap.Height;
-            Rect.X = 0;
-            Rect.Y = 0;
+            Z = z;
             
             imageFormatType = ImageFormatType.CutTopLeft;
+        }
+        private void panel_Paint(object sender, PaintEventArgs e)
+        {
+            e.Graphics.DrawImage(bitmap, (sender as Panel).ClientRectangle, SrcRect, GraphicsUnit.Pixel);
+            if (isSelected)
+                e.Graphics.DrawRectangle(selectionPen, (sender as Panel).ClientRectangle);
         }
 
         public void CalculateSrcRect()

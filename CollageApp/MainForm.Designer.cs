@@ -51,6 +51,7 @@ namespace CollageApp
             this.ImageListView = new System.Windows.Forms.ListBox();
             this.previewBox = new System.Windows.Forms.GroupBox();
             this.previewPanel = new System.Windows.Forms.Panel();
+            this.ThumbnailImageSelectionPanel = new System.Windows.Forms.Panel();
             this.selectFilesButton = new System.Windows.Forms.Button();
             this.blockHeightTextBox = new System.Windows.Forms.NumericUpDown();
             this.blockWidthTextBox = new System.Windows.Forms.NumericUpDown();
@@ -73,6 +74,7 @@ namespace CollageApp
             ((System.ComponentModel.ISupportInitialize)(this.HCut)).BeginInit();
             this.imageListBox.SuspendLayout();
             this.previewBox.SuspendLayout();
+            this.previewPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.blockHeightTextBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.blockWidthTextBox)).BeginInit();
             this.templateBox.SuspendLayout();
@@ -90,9 +92,6 @@ namespace CollageApp
             this.MainPanel.Size = new System.Drawing.Size(1080, 545);
             this.MainPanel.TabIndex = 0;
             this.MainPanel.Paint += new System.Windows.Forms.PaintEventHandler(this.panel1_Paint);
-            this.MainPanel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.MainPanel_MouseDown);
-            this.MainPanel.MouseMove += new System.Windows.Forms.MouseEventHandler(this.MainPanel_MouseMove);
-            this.MainPanel.MouseUp += new System.Windows.Forms.MouseEventHandler(this.MainPanel_MouseUp);
             // 
             // ImagePreviewPanel
             // 
@@ -328,14 +327,21 @@ namespace CollageApp
             // 
             this.previewPanel.BackColor = System.Drawing.SystemColors.ButtonShadow;
             this.previewPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.previewPanel.Controls.Add(this.ThumbnailImageSelectionPanel);
             this.previewPanel.Location = new System.Drawing.Point(6, 19);
             this.previewPanel.Name = "previewPanel";
             this.previewPanel.Size = new System.Drawing.Size(313, 285);
             this.previewPanel.TabIndex = 8;
             this.previewPanel.Paint += new System.Windows.Forms.PaintEventHandler(this.previewPanel_Paint);
-            this.previewPanel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.previewPanel_MouseDown);
-            this.previewPanel.MouseMove += new System.Windows.Forms.MouseEventHandler(this.previewPanel_MouseMove);
-            this.previewPanel.MouseUp += new System.Windows.Forms.MouseEventHandler(this.previewPanel_MouseUp);
+            // 
+            // ThumbnailImageSelectionPanel
+            // 
+            this.ThumbnailImageSelectionPanel.BackColor = System.Drawing.SystemColors.MenuHighlight;
+            this.ThumbnailImageSelectionPanel.Location = new System.Drawing.Point(50, 65);
+            this.ThumbnailImageSelectionPanel.Name = "ThumbnailImageSelectionPanel";
+            this.ThumbnailImageSelectionPanel.Size = new System.Drawing.Size(200, 100);
+            this.ThumbnailImageSelectionPanel.TabIndex = 0;
+            this.ThumbnailImageSelectionPanel.MouseMove += new System.Windows.Forms.MouseEventHandler(this.ThumbnailImageSelectionPanel_MouseMove);
             // 
             // selectFilesButton
             // 
@@ -387,7 +393,6 @@ namespace CollageApp
             this.templateBox.TabIndex = 4;
             this.templateBox.TabStop = false;
             this.templateBox.Text = "Шаблон";
-            this.templateBox.Enter += new System.EventHandler(this.templateBox_Enter);
             // 
             // columnsTextBox
             // 
@@ -484,9 +489,7 @@ namespace CollageApp
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "MainForm";
             this.Text = "АвтоКоллаж";
-            this.Load += new System.EventHandler(this.MainForm_Load);
             this.Shown += new System.EventHandler(this.MainForm_Shown);
-            this.Paint += new System.Windows.Forms.PaintEventHandler(this.MainForm_Paint);
             this.Resize += new System.EventHandler(this.MainForm_Resize);
             this.ImagePreviewPanel.ResumeLayout(false);
             this.ImagePreviewPanel.PerformLayout();
@@ -498,6 +501,7 @@ namespace CollageApp
             ((System.ComponentModel.ISupportInitialize)(this.HCut)).EndInit();
             this.imageListBox.ResumeLayout(false);
             this.previewBox.ResumeLayout(false);
+            this.previewPanel.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.blockHeightTextBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.blockWidthTextBox)).EndInit();
             this.templateBox.ResumeLayout(false);
@@ -547,6 +551,7 @@ namespace CollageApp
         private Label label6;
         private Label label5;
         private Label label7;
+        private Panel ThumbnailImageSelectionPanel;
     }
 }
 

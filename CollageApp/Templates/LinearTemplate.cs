@@ -31,7 +31,7 @@ namespace CollageApp.Templates
 
         }
 
-        public void RearrangeImagesAccordingToTemplate(IEnumerable<Image> images, Rectangle rect)
+        public void RearrangeImagesAccordingToTemplate(IEnumerable<ImageInfo> images, Rectangle rect)
         {
             blockWidth = Columns * BlockWidth >= rect.Width ? rect.Width / Columns : BlockWidth;
             blockHeight = Rows * BlockHeight >= rect.Height ? rect.Height / Rows : BlockHeight;
@@ -42,7 +42,7 @@ namespace CollageApp.Templates
             blockHeight = BlockHeight * Multiplier;
 
             int i = 0, j = 0;
-            foreach(Image image in images)
+            foreach(ImageInfo image in images)
             {
                 image.Rect.X = j * blockWidth;
                 image.Rect.Y = i * blockHeight;
@@ -53,6 +53,9 @@ namespace CollageApp.Templates
                 image.OriginalRect.Y = i * BlockHeight;
                 image.OriginalRect.Width = BlockWidth;
                 image.OriginalRect.Height = BlockHeight;
+
+                image.ImagePanel.Location=  new Point((int)image.Rect.X, (int)image.Rect.Y);
+                image.ImagePanel.Size = new Size((int)image.Rect.Width, (int)image.Rect.Height);
 
                 image.CalculateSrcRect();
 

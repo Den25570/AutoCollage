@@ -9,7 +9,7 @@ namespace CollageApp
 {
     public interface ITemplate
     {
-        void RearrangeImagesAccordingToTemplate(IEnumerable<Image> images, Rectangle rect);
+        void RearrangeImagesAccordingToTemplate(IEnumerable<ImageInfo> images, Rectangle rect);
         void DrawTemplate(Graphics graphics);
         int GetBlockIndex(Point pos);
 
