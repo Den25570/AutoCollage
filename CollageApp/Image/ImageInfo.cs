@@ -21,22 +21,22 @@ namespace CollageApp
 
     public class ImageInfo
     {
+        //
         public RectangleF OriginalRect;
         public RectangleF Rect;
-        public RectangleF SrcRect;
-        public ImageFormatType imageFormatType;
-        public int Z;
         public string Name;
-
-        public bool isSelected = false;
-
         public Bitmap bitmap;
-
         public ImagePanel ImagePanel = new ImagePanel();
-
         private Pen selectionPen = new Pen(Color.Blue, 4);
 
-        public ImageInfo(string path, int z)
+        //
+        public RectangleF SrcRect;
+        public ImageFormatType imageFormatType;
+
+        //
+        public bool isSelected = false;
+
+        public ImageInfo(string path, int index)
         {
             try
             {
@@ -45,7 +45,7 @@ namespace CollageApp
                 ImagePanel.Visible = true;
                 ImagePanel.BackColor = System.Drawing.SystemColors.AppWorkspace;
                 ImagePanel.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-                ImagePanel.Name = "ImagePanel_" + z;
+                ImagePanel.Name = "ImagePanel_" + index;
                 ImagePanel.Paint += panel_Paint;
             }
             catch (Exception e)
@@ -53,8 +53,7 @@ namespace CollageApp
                 throw e;
             }
 
-            Name = Path.GetFileNameWithoutExtension(path);
-            Z = z;
+            Name = Path.GetFileName(path);
             
             imageFormatType = ImageFormatType.CutTopLeft;
         }
@@ -67,25 +66,32 @@ namespace CollageApp
 
         public void CalculateSrcRect()
         {
+            SrcRect = CalculateSrcRect(imageFormatType);
+        }
+
+        public RectangleF CalculateSrcRect(ImageFormatType imageFormatType)
+        {
+            RectangleF srcRect = new RectangleF();
             float scale = Math.Min(bitmap.Width / OriginalRect.Width, bitmap.Height / OriginalRect.Height);
             switch (imageFormatType)
             {
-                case ImageFormatType.CutTopLeft:                  
-                    SrcRect = new RectangleF(0, 0, OriginalRect.Width * scale, OriginalRect.Height * scale);
+                case ImageFormatType.CutTopLeft:
+                    srcRect = new RectangleF(0, 0, OriginalRect.Width * scale, OriginalRect.Height * scale);
                     break;
                 case ImageFormatType.CutBotRight:
-                    SrcRect = new RectangleF(bitmap.Width - OriginalRect.Width * scale, bitmap.Height - OriginalRect.Height * scale, OriginalRect.Width * scale, OriginalRect.Height * scale);
+                    srcRect = new RectangleF(bitmap.Width - OriginalRect.Width * scale, bitmap.Height - OriginalRect.Height * scale, OriginalRect.Width * scale, OriginalRect.Height * scale);
                     break;
                 case ImageFormatType.CutMiddle:
-                    SrcRect = new RectangleF(bitmap.Width / 2 - (OriginalRect.Width * scale) / 2, bitmap.Height / 2 - (OriginalRect.Height * scale) / 2, OriginalRect.Width * scale, OriginalRect.Height * scale);
+                    srcRect = new RectangleF(bitmap.Width / 2 - (OriginalRect.Width * scale) / 2, bitmap.Height / 2 - (OriginalRect.Height * scale) / 2, OriginalRect.Width * scale, OriginalRect.Height * scale);
                     break;
                 case ImageFormatType.CustomCut:
-
                     break;
                 case ImageFormatType.Stretch:
-                    SrcRect = new RectangleF(0, 0, bitmap.Width, bitmap.Height);
+                    srcRect = new RectangleF(0, 0, bitmap.Width, bitmap.Height);
                     break;
             }
+            return srcRect;
         }
+
     }
 }

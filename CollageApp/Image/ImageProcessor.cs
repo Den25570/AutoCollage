@@ -103,15 +103,25 @@ namespace CollageApp
                     int selectedIndex = Images.FindIndex(image => image.Name == SelectedImage.Name);
 
                     if (index == selectedIndex)
-                    {
                         return true;
-                    }
-
-                    Images[selectedIndex] = Images[index];
-                    Images[index] = SelectedImage;
+                    else
+                        SwapImages(selectedIndex, index);
                 }
             }
             return false;
+        }
+
+        public void SwapImages(int index1, int index2)
+        {
+            ImageInfo temp = Images[index1];
+            Images[index1] = Images[index2];
+            Images[index2] = temp;
+        }
+
+        public void ChangeImageProperties(ImageInfo image, RectangleF srcRect, ImageFormatType imageFormatType)
+        {
+            image.SrcRect = srcRect;
+            image.imageFormatType = imageFormatType;
         }
 
         public void LoadAllImages(IEnumerable<string> paths)

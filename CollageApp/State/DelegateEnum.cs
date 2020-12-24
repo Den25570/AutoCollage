@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CollageApp.State
 {
-    enum DelegateEnum
+    public enum DelegateEnum
     {
         LoadImages,
         UnloadImages,

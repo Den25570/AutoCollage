@@ -13,6 +13,8 @@ namespace CollageApp
         void DrawTemplate(Graphics graphics);
         int GetBlockIndex(Point pos);
 
+        void ChangeTemplateProperties(object[] properties);
+
         int TotalCells { get; }
     }
 }

@@ -24,11 +24,24 @@ namespace CollageApp.Templates
         private float blockHeight;
 
         private Pen templatePen = new Pen(Color.White);
+
+        /* Block region */
+
         private List<Block> blocks;
 
         public void InitBlocks()
         {
 
+        }
+
+        /*------------------------------*/
+
+        public void ChangeTemplateProperties(object[] objects)
+        {
+            Rows = (int)objects[0] != 0 ? (int)objects[0] : Rows;
+            Columns = (int)objects[1] != 0 ? (int)objects[1] : Columns;
+            BlockWidth = (int)objects[2] != 0 ? (int)objects[2] : BlockWidth;
+            BlockHeight = (int)objects[3] != 0 ? (int)objects[3] : BlockHeight;
         }
 
         public void RearrangeImagesAccordingToTemplate(IEnumerable<ImageInfo> images, Rectangle rect)

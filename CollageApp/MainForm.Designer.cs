@@ -34,6 +34,7 @@ namespace CollageApp
             this.MainPanel = new System.Windows.Forms.Panel();
             this.ImagePreviewPanel = new System.Windows.Forms.Panel();
             this.formattingBox = new System.Windows.Forms.GroupBox();
+            this.ImageApplyButton = new System.Windows.Forms.Button();
             this.label7 = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
@@ -63,9 +64,23 @@ namespace CollageApp
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.menuStrip = new System.Windows.Forms.MenuStrip();
             this.файлToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.сохранитьToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.сохранитьКакToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.сохранитьToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.jpegToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.pngToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.bmpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.выходToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.шаблонToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.выровнятьВсеИзображенияToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.поЦентруToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.сверхуСлеваToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.справаСнизуToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.растянутьToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.изображенияToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.экспортироватьToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ImagePreviewPanel.SuspendLayout();
             this.formattingBox.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.WCut)).BeginInit();
@@ -80,22 +95,28 @@ namespace CollageApp
             this.templateBox.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.columnsTextBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.rowsTextBox)).BeginInit();
-            this.menuStrip1.SuspendLayout();
+            this.menuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // MainPanel
             // 
+            this.MainPanel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
+            this.MainPanel.AutoScroll = true;
+            this.MainPanel.AutoSize = true;
             this.MainPanel.BackColor = System.Drawing.SystemColors.AppWorkspace;
+            this.MainPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.MainPanel.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.MainPanel.Location = new System.Drawing.Point(12, 31);
+            this.MainPanel.Location = new System.Drawing.Point(0, 27);
             this.MainPanel.Name = "MainPanel";
-            this.MainPanel.Size = new System.Drawing.Size(1080, 545);
+            this.MainPanel.Size = new System.Drawing.Size(1097, 596);
             this.MainPanel.TabIndex = 0;
             this.MainPanel.Paint += new System.Windows.Forms.PaintEventHandler(this.panel1_Paint);
             // 
             // ImagePreviewPanel
             // 
             this.ImagePreviewPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.ImagePreviewPanel.AutoSize = true;
             this.ImagePreviewPanel.BackColor = System.Drawing.SystemColors.AppWorkspace;
             this.ImagePreviewPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.ImagePreviewPanel.Controls.Add(this.formattingBox);
@@ -107,13 +128,14 @@ namespace CollageApp
             this.ImagePreviewPanel.Controls.Add(this.templateBox);
             this.ImagePreviewPanel.Controls.Add(this.label2);
             this.ImagePreviewPanel.Controls.Add(this.label1);
-            this.ImagePreviewPanel.Location = new System.Drawing.Point(1258, 0);
+            this.ImagePreviewPanel.Location = new System.Drawing.Point(878, 27);
             this.ImagePreviewPanel.Name = "ImagePreviewPanel";
-            this.ImagePreviewPanel.Size = new System.Drawing.Size(345, 587);
+            this.ImagePreviewPanel.Size = new System.Drawing.Size(345, 596);
             this.ImagePreviewPanel.TabIndex = 1;
             // 
             // formattingBox
             // 
+            this.formattingBox.Controls.Add(this.ImageApplyButton);
             this.formattingBox.Controls.Add(this.label7);
             this.formattingBox.Controls.Add(this.label6);
             this.formattingBox.Controls.Add(this.label5);
@@ -129,10 +151,21 @@ namespace CollageApp
             this.formattingBox.Controls.Add(this.cutTopLeftRadio);
             this.formattingBox.Location = new System.Drawing.Point(212, 328);
             this.formattingBox.Name = "formattingBox";
-            this.formattingBox.Size = new System.Drawing.Size(119, 247);
+            this.formattingBox.Size = new System.Drawing.Size(119, 263);
             this.formattingBox.TabIndex = 13;
             this.formattingBox.TabStop = false;
             this.formattingBox.Text = "Форматирование изображения";
+            // 
+            // ImageApplyButton
+            // 
+            this.ImageApplyButton.BackColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.ImageApplyButton.Location = new System.Drawing.Point(9, 236);
+            this.ImageApplyButton.Name = "ImageApplyButton";
+            this.ImageApplyButton.Size = new System.Drawing.Size(103, 23);
+            this.ImageApplyButton.TabIndex = 21;
+            this.ImageApplyButton.Text = "Применить";
+            this.ImageApplyButton.UseVisualStyleBackColor = false;
+            this.ImageApplyButton.Click += new System.EventHandler(this.ImageApplyButton_Click);
             // 
             // label7
             // 
@@ -244,7 +277,6 @@ namespace CollageApp
             this.stretchRadio.TabStop = true;
             this.stretchRadio.Text = "Растянуть";
             this.stretchRadio.UseVisualStyleBackColor = true;
-            this.stretchRadio.CheckedChanged += new System.EventHandler(this.radioButton1_CheckedChanged);
             // 
             // cutCustomRadio
             // 
@@ -349,7 +381,7 @@ namespace CollageApp
             this.selectFilesButton.BackColor = System.Drawing.SystemColors.ButtonHighlight;
             this.selectFilesButton.Location = new System.Drawing.Point(6, 552);
             this.selectFilesButton.Name = "selectFilesButton";
-            this.selectFilesButton.Size = new System.Drawing.Size(191, 23);
+            this.selectFilesButton.Size = new System.Drawing.Size(197, 23);
             this.selectFilesButton.TabIndex = 2;
             this.selectFilesButton.Text = "Выбрать директорию";
             this.selectFilesButton.UseVisualStyleBackColor = false;
@@ -452,44 +484,150 @@ namespace CollageApp
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
             // 
-            // menuStrip1
+            // menuStrip
             // 
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.файлToolStripMenuItem});
-            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(1602, 24);
-            this.menuStrip1.TabIndex = 2;
-            this.menuStrip1.Text = "menuStrip1";
+            this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.файлToolStripMenuItem,
+            this.шаблонToolStripMenuItem,
+            this.изображенияToolStripMenuItem});
+            this.menuStrip.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip.Name = "menuStrip";
+            this.menuStrip.Size = new System.Drawing.Size(1222, 24);
+            this.menuStrip.TabIndex = 2;
+            this.menuStrip.Text = "menuStrip";
             // 
             // файлToolStripMenuItem
             // 
             this.файлToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.сохранитьToolStripMenuItem});
+            this.сохранитьToolStripMenuItem1,
+            this.сохранитьКакToolStripMenuItem,
+            this.сохранитьToolStripMenuItem,
+            this.выходToolStripMenuItem});
             this.файлToolStripMenuItem.Name = "файлToolStripMenuItem";
             this.файлToolStripMenuItem.Size = new System.Drawing.Size(48, 20);
             this.файлToolStripMenuItem.Text = "Файл";
             // 
+            // сохранитьToolStripMenuItem1
+            // 
+            this.сохранитьToolStripMenuItem1.Name = "сохранитьToolStripMenuItem1";
+            this.сохранитьToolStripMenuItem1.Size = new System.Drawing.Size(162, 22);
+            this.сохранитьToolStripMenuItem1.Text = "Сохранить";
+            // 
+            // сохранитьКакToolStripMenuItem
+            // 
+            this.сохранитьКакToolStripMenuItem.Name = "сохранитьКакToolStripMenuItem";
+            this.сохранитьКакToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
+            this.сохранитьКакToolStripMenuItem.Text = "Сохранить как...";
+            // 
             // сохранитьToolStripMenuItem
             // 
+            this.сохранитьToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.jpegToolStripMenuItem,
+            this.pngToolStripMenuItem,
+            this.bmpToolStripMenuItem});
             this.сохранитьToolStripMenuItem.Name = "сохранитьToolStripMenuItem";
-            this.сохранитьToolStripMenuItem.Size = new System.Drawing.Size(132, 22);
-            this.сохранитьToolStripMenuItem.Text = "Сохранить";
+            this.сохранитьToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
+            this.сохранитьToolStripMenuItem.Text = "Экспорт...";
             this.сохранитьToolStripMenuItem.Click += new System.EventHandler(this.сохранитьToolStripMenuItem_Click);
+            // 
+            // jpegToolStripMenuItem
+            // 
+            this.jpegToolStripMenuItem.Name = "jpegToolStripMenuItem";
+            this.jpegToolStripMenuItem.Size = new System.Drawing.Size(99, 22);
+            this.jpegToolStripMenuItem.Text = "JPEG";
+            // 
+            // pngToolStripMenuItem
+            // 
+            this.pngToolStripMenuItem.Name = "pngToolStripMenuItem";
+            this.pngToolStripMenuItem.Size = new System.Drawing.Size(99, 22);
+            this.pngToolStripMenuItem.Text = "PNG";
+            // 
+            // bmpToolStripMenuItem
+            // 
+            this.bmpToolStripMenuItem.Name = "bmpToolStripMenuItem";
+            this.bmpToolStripMenuItem.Size = new System.Drawing.Size(99, 22);
+            this.bmpToolStripMenuItem.Text = "BMP";
+            // 
+            // выходToolStripMenuItem
+            // 
+            this.выходToolStripMenuItem.Name = "выходToolStripMenuItem";
+            this.выходToolStripMenuItem.Size = new System.Drawing.Size(162, 22);
+            this.выходToolStripMenuItem.Text = "Выход";
+            this.выходToolStripMenuItem.Click += new System.EventHandler(this.выходToolStripMenuItem_Click);
+            // 
+            // шаблонToolStripMenuItem
+            // 
+            this.шаблонToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.выровнятьВсеИзображенияToolStripMenuItem});
+            this.шаблонToolStripMenuItem.Name = "шаблонToolStripMenuItem";
+            this.шаблонToolStripMenuItem.Size = new System.Drawing.Size(64, 20);
+            this.шаблонToolStripMenuItem.Text = "Шаблон";
+            // 
+            // выровнятьВсеИзображенияToolStripMenuItem
+            // 
+            this.выровнятьВсеИзображенияToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.поЦентруToolStripMenuItem,
+            this.сверхуСлеваToolStripMenuItem,
+            this.справаСнизуToolStripMenuItem,
+            this.растянутьToolStripMenuItem});
+            this.выровнятьВсеИзображенияToolStripMenuItem.Name = "выровнятьВсеИзображенияToolStripMenuItem";
+            this.выровнятьВсеИзображенияToolStripMenuItem.Size = new System.Drawing.Size(241, 22);
+            this.выровнятьВсеИзображенияToolStripMenuItem.Text = "Выровнять все изображения...";
+            // 
+            // поЦентруToolStripMenuItem
+            // 
+            this.поЦентруToolStripMenuItem.Name = "поЦентруToolStripMenuItem";
+            this.поЦентруToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.поЦентруToolStripMenuItem.Text = "По центру";
+            // 
+            // сверхуСлеваToolStripMenuItem
+            // 
+            this.сверхуСлеваToolStripMenuItem.Name = "сверхуСлеваToolStripMenuItem";
+            this.сверхуСлеваToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.сверхуСлеваToolStripMenuItem.Text = "Сверху/Слева";
+            // 
+            // справаСнизуToolStripMenuItem
+            // 
+            this.справаСнизуToolStripMenuItem.Name = "справаСнизуToolStripMenuItem";
+            this.справаСнизуToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.справаСнизуToolStripMenuItem.Text = "Справа/Снизу";
+            // 
+            // растянутьToolStripMenuItem
+            // 
+            this.растянутьToolStripMenuItem.Name = "растянутьToolStripMenuItem";
+            this.растянутьToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.растянутьToolStripMenuItem.Text = "Растянуть";
+            // 
+            // изображенияToolStripMenuItem
+            // 
+            this.изображенияToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.экспортироватьToolStripMenuItem});
+            this.изображенияToolStripMenuItem.Name = "изображенияToolStripMenuItem";
+            this.изображенияToolStripMenuItem.Size = new System.Drawing.Size(95, 20);
+            this.изображенияToolStripMenuItem.Text = "Изображения";
+            // 
+            // экспортироватьToolStripMenuItem
+            // 
+            this.экспортироватьToolStripMenuItem.Name = "экспортироватьToolStripMenuItem";
+            this.экспортироватьToolStripMenuItem.Size = new System.Drawing.Size(184, 22);
+            this.экспортироватьToolStripMenuItem.Text = "Экспортировать все";
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.ClientSize = new System.Drawing.Size(1602, 873);
+            this.ClientSize = new System.Drawing.Size(1222, 625);
             this.Controls.Add(this.ImagePreviewPanel);
             this.Controls.Add(this.MainPanel);
-            this.Controls.Add(this.menuStrip1);
-            this.MainMenuStrip = this.menuStrip1;
+            this.Controls.Add(this.menuStrip);
+            this.KeyPreview = true;
+            this.MainMenuStrip = this.menuStrip;
             this.Name = "MainForm";
             this.Text = "АвтоКоллаж";
             this.Shown += new System.EventHandler(this.MainForm_Shown);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyDown);
+            this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.MainForm_KeyPress);
             this.Resize += new System.EventHandler(this.MainForm_Resize);
             this.ImagePreviewPanel.ResumeLayout(false);
             this.ImagePreviewPanel.PerformLayout();
@@ -508,8 +646,8 @@ namespace CollageApp
             this.templateBox.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.columnsTextBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.rowsTextBox)).EndInit();
-            this.menuStrip1.ResumeLayout(false);
-            this.menuStrip1.PerformLayout();
+            this.menuStrip.ResumeLayout(false);
+            this.menuStrip.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -540,7 +678,7 @@ namespace CollageApp
         private RadioButton cutRightBottomRadio;
         private RadioButton cutTopLeftRadio;
         private RadioButton stretchRadio;
-        private MenuStrip menuStrip1;
+        private MenuStrip menuStrip;
         private ToolStripMenuItem файлToolStripMenuItem;
         private ToolStripMenuItem сохранитьToolStripMenuItem;
         private Label label4;
@@ -552,6 +690,21 @@ namespace CollageApp
         private Label label5;
         private Label label7;
         private Panel ThumbnailImageSelectionPanel;
+        private ToolStripMenuItem сохранитьToolStripMenuItem1;
+        private ToolStripMenuItem сохранитьКакToolStripMenuItem;
+        private ToolStripMenuItem jpegToolStripMenuItem;
+        private ToolStripMenuItem pngToolStripMenuItem;
+        private ToolStripMenuItem bmpToolStripMenuItem;
+        private ToolStripMenuItem выходToolStripMenuItem;
+        private ToolStripMenuItem шаблонToolStripMenuItem;
+        private ToolStripMenuItem выровнятьВсеИзображенияToolStripMenuItem;
+        private ToolStripMenuItem поЦентруToolStripMenuItem;
+        private ToolStripMenuItem сверхуСлеваToolStripMenuItem;
+        private ToolStripMenuItem справаСнизуToolStripMenuItem;
+        private ToolStripMenuItem растянутьToolStripMenuItem;
+        private ToolStripMenuItem изображенияToolStripMenuItem;
+        private ToolStripMenuItem экспортироватьToolStripMenuItem;
+        private Button ImageApplyButton;
     }
 }
 

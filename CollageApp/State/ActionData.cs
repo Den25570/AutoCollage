@@ -8,15 +8,15 @@ namespace CollageApp.State
 {
     public class ActionData
     {
-        public int ActionId { get; private set; }
-        public int UndoActionId { get; private set; }
+        public DelegateEnum Action { get; private set; }
+        public DelegateEnum UndoAction { get; private set; }
         public object[] ActionParams { get; private set; }
         public object[] UndoActionParams { get; private set; }
 
-        public ActionData(int actionId, int undoActionId, object[] actionParams, object[] undoActionParams)
+        public ActionData(DelegateEnum action, DelegateEnum undoAction, object[] actionParams, object[] undoActionParams)
         {
-            ActionId = actionId;
-            UndoActionId = undoActionId;
+            Action = action;
+            UndoAction = undoAction;
             ActionParams = actionParams;
             UndoActionParams = undoActionParams;
         }

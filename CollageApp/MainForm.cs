@@ -32,17 +32,16 @@ namespace CollageApp
         //Utils
         private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         private AppState appState = new AppState();
+        private Dictionary<RadioButton, ImageFormatType> radioButtonAssociations = new Dictionary<RadioButton, ImageFormatType>();
 
         //Drawing stuff
-        private ImageProcessor imageProcessor = new ImageProcessor(log);
-        private LinearTemplate template;
+        public ImageProcessor imageProcessor = new ImageProcessor(log);
+        public ImageInfo SelectedImage { get { return imageProcessor.SelectedImage; } }
+        public LinearTemplate template;
         private GraphicsState buffer;
         private Pen borderPen;
         private bool blockControlUpdating;
         private float thumbnailMultiplier;
-
-        //
-        private List<Panel> panels = new List<Panel>();
 
         //Pens/Brushes/Colors
         Color lightGreenSemiTransparent = Color.FromArgb(120, Color.LightGreen.R, Color.LightGreen.G, Color.LightGreen.B);
@@ -50,6 +49,8 @@ namespace CollageApp
 
         public MainForm()
         {
+            blockControlUpdating = true;
+
             InitializeComponent();
 
             //ToDo: make selectable
@@ -58,6 +59,8 @@ namespace CollageApp
             SetInitialValues();
 
             log.Info("Program startup.");
+
+            blockControlUpdating = false;
         }
 
         private void SetInitialValues()
@@ -75,9 +78,12 @@ namespace CollageApp
             typeof(Panel).InvokeMember("DoubleBuffered", BindingFlags.SetProperty | BindingFlags.Instance | BindingFlags.NonPublic, null, this.previewPanel, new object[] { true });
             ThumbnailImageSelectionPanel.BackColor = lightGreenSemiTransparent;
 
-            //PrepearingState
-            // appState.AddDelegate(DelegateEnum.LoadImages, LoadImages);
-            // appState.AddDelegate(DelegateEnum.LoadImages, LoadImages);
+            //
+            radioButtonAssociations.Add(cutTopLeftRadio, ImageFormatType.CutTopLeft);
+            radioButtonAssociations.Add(cutRightBottomRadio, ImageFormatType.CutBotRight);
+            radioButtonAssociations.Add(cutMiddleRadio, ImageFormatType.CutMiddle);
+            radioButtonAssociations.Add(stretchRadio, ImageFormatType.Stretch);
+            radioButtonAssociations.Add(cutCustomRadio, ImageFormatType.CustomCut);
         }
 
         private void panel1_Paint(object sender, PaintEventArgs e)
@@ -87,6 +93,7 @@ namespace CollageApp
 
         private void ImageSelected()
         {
+            imageProcessor.SelectedImage.ImagePanel.BringToFront();
             switch (imageProcessor.SelectedImage.imageFormatType)
             {
                 case ImageFormatType.CutTopLeft:
@@ -113,12 +120,7 @@ namespace CollageApp
             XCut.Value = (decimal)Math.Ceiling(imageProcessor.SelectedImage.SrcRect.X);
             YCut.Value = (decimal)Math.Ceiling(imageProcessor.SelectedImage.SrcRect.Y);
             WCut.Value = (decimal)Math.Ceiling(imageProcessor.SelectedImage.SrcRect.Width);
-            HCut.Value = (decimal)Math.Ceiling(imageProcessor.SelectedImage.SrcRect.Height);
-
-            if (imageProcessor.SelectedImage.imageFormatType == ImageFormatType.CustomCut)
-                XCut.Enabled = YCut.Enabled = WCut.Enabled = HCut.Enabled = true;
-            else
-                XCut.Enabled = YCut.Enabled = WCut.Enabled = HCut.Enabled = false;
+            HCut.Value = (decimal)Math.Ceiling(imageProcessor.SelectedImage.SrcRect.Height);      
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -131,13 +133,13 @@ namespace CollageApp
             if (dr == System.Windows.Forms.DialogResult.OK)
             {
                 LoadImages(openFileDialog1.FileNames);
-                updateField(true);
+                UpdateField(true);
             }
         }
 
-        private void LoadImages(string[] filenames)
+        public void LoadImages(string[] filenames)
         {
-            imageProcessor.ClearImages();
+            UnloadImages();
             imageProcessor.LoadAllImages(openFileDialog1.FileNames);
 
             ImageListView.Items.Clear();
@@ -153,6 +155,8 @@ namespace CollageApp
 
             imageProcessor.SelectedImage = null;
             ThumbnailImageSelectionPanel.Enabled = ThumbnailImageSelectionPanel.Visible = false;
+
+            appState.AddAction(DelegateEnum.LoadImages, DelegateEnum.UnloadImages, new object[]{ this, filenames }, new object[] { this });
         }
 
         private void panel_MouseMove(object sender, MouseEventArgs e)
@@ -167,7 +171,7 @@ namespace CollageApp
                 imageProcessor.PlaceImage(template.GetBlockIndex(new Point(e.Location.X + (sender as Control).Location.X, e.Location.Y + (sender as Control).Location.Y)));
                 template.RearrangeImagesAccordingToTemplate(imageProcessor.Images, MainPanel.ClientRectangle);
 
-                updateField(true);
+                UpdateField(true);
             }
         }
 
@@ -201,18 +205,29 @@ namespace CollageApp
                 (sender as Control).Invalidate();
                 previewPanel.Invalidate();
             }
+
+            UpdateField(false);
         }
 
-        private void UnloadImages()
+        public void UnloadImages()
         {
-            imageProcessor.ClearImages();
+            if (imageProcessor.Images != null && imageProcessor.Images.Count != 0)
+            {
+                foreach(var image in imageProcessor.Images)
+                {
+                    MainPanel.Controls.Remove(image.ImagePanel);
+                }
+
+                imageProcessor.ClearImages();
+            }
+            
             ImageListView.Items.Clear();
-            panels.Clear();
+
             imageProcessor.SelectedImage = null;
             ThumbnailImageSelectionPanel.Enabled = ThumbnailImageSelectionPanel.Visible = false;
         }
 
-        private void updateField(bool updateAll)
+        private void UpdateField(bool updateAll)
         {
             imageProcessor.Width = template.Columns * template.BlockWidth;
             imageProcessor.Height = template.Rows * template.BlockHeight;
@@ -225,17 +240,7 @@ namespace CollageApp
 
             if (imageProcessor.SelectedImage != null)
             {
-                ThumbnailImageSelectionPanel.Enabled = ThumbnailImageSelectionPanel.Visible = true;
-                thumbnailMultiplier = Math.Min(previewPanel.ClientRectangle.Height / (float)imageProcessor.SelectedImage.bitmap.Height, previewPanel.ClientRectangle.Width / (float)imageProcessor.SelectedImage.bitmap.Width);
-                ThumbnailImageSelectionPanel.Location = new Point((int)(imageProcessor.SelectedImage.SrcRect.X * thumbnailMultiplier + previewPanel.ClientRectangle.Width / 2 - imageProcessor.SelectedImage.bitmap.Width * thumbnailMultiplier / 2),
-                        (int)(imageProcessor.SelectedImage.SrcRect.Y * thumbnailMultiplier + previewPanel.ClientRectangle.Height / 2 - imageProcessor.SelectedImage.bitmap.Height * thumbnailMultiplier / 2));
-                ThumbnailImageSelectionPanel.Size = new Size((int)(imageProcessor.SelectedImage.SrcRect.Width * thumbnailMultiplier),
-                        (int)(imageProcessor.SelectedImage.SrcRect.Height * thumbnailMultiplier));
-
-                UpdateCutValues();
-
-                
-                
+                updateSelectionRect();   
             }
             if (updateAll)
                 foreach (var image in imageProcessor.Images)
@@ -245,28 +250,78 @@ namespace CollageApp
             previewPanel.Invalidate();
         }
 
+        public void updateSelectionRect()
+        {
+            ImageFormatType imageFormatType = radioButtonAssociations[formattingBox.Controls.OfType<RadioButton>().FirstOrDefault(r => r.Checked)];
+
+            RectangleF srcRect = imageFormatType != ImageFormatType.CustomCut ? SelectedImage.CalculateSrcRect(imageFormatType) : new RectangleF((int)XCut.Value, (int)YCut.Value, (int)WCut.Value, (int)HCut.Value);
+
+            blockControlUpdating = true;
+            XCut.Value = (decimal)Math.Ceiling(srcRect.X);
+            YCut.Value = (decimal)Math.Ceiling(srcRect.Y);
+            WCut.Value = (decimal)Math.Ceiling(srcRect.Width);
+            HCut.Value = (decimal)Math.Ceiling(srcRect.Height);
+
+            ThumbnailImageSelectionPanel.Enabled = ThumbnailImageSelectionPanel.Visible = true;
+            thumbnailMultiplier = Math.Min(previewPanel.ClientRectangle.Height / (float)imageProcessor.SelectedImage.bitmap.Height, previewPanel.ClientRectangle.Width / (float)imageProcessor.SelectedImage.bitmap.Width);
+
+            ThumbnailImageSelectionPanel.Location = new Point((int)(srcRect.X * thumbnailMultiplier + previewPanel.ClientRectangle.Width / 2 - imageProcessor.SelectedImage.bitmap.Width * thumbnailMultiplier / 2),
+                    (int)(srcRect.Y * thumbnailMultiplier + previewPanel.ClientRectangle.Height / 2 - imageProcessor.SelectedImage.bitmap.Height * thumbnailMultiplier / 2));
+            ThumbnailImageSelectionPanel.Size = new Size((int)(srcRect.Width * thumbnailMultiplier),
+                    (int)(srcRect.Height * thumbnailMultiplier));
+
+            if (imageFormatType == ImageFormatType.CustomCut)
+                XCut.Enabled = YCut.Enabled = WCut.Enabled = HCut.Enabled = true;
+            else
+                XCut.Enabled = YCut.Enabled = WCut.Enabled = HCut.Enabled = false;
+
+            blockControlUpdating = false;
+            imageProcessor.SelectedImage?.ImagePanel.Invalidate();
+            previewPanel.Invalidate();
+        }
+
         private void rowsTextBox_ValueChanged(object sender, EventArgs e)
         {
-            template.Rows = (int)(rowsTextBox.Value);
-            updateField(true);           
+            if (!blockControlUpdating)
+            {
+                appState.AddAction(DelegateEnum.ChangeFieldProperties, DelegateEnum.ChangeFieldProperties,
+                    new object[] { this, new object[] { (int)(rowsTextBox.Value), 0, 0, 0 } }, new object[] { this, new object[] { template.Rows, 0, 0, 0 } });
+                template.Rows = (int)(rowsTextBox.Value);
+                UpdateField(true);
+            }        
         }
 
         private void columnsTextBox_ValueChanged(object sender, EventArgs e)
         {
-            template.Columns = (int)(columnsTextBox.Value);
-            updateField(true);
+            if (!blockControlUpdating)
+            {
+                appState.AddAction(DelegateEnum.ChangeFieldProperties, DelegateEnum.ChangeFieldProperties,
+                new object[] { this, new object[] { 0, (int)(columnsTextBox.Value), 0, 0 } }, new object[] { this, new object[] { 0, template.Columns, 0, 0 } });
+                template.Columns = (int)(columnsTextBox.Value);
+                UpdateField(true);
+            }
         }
 
         private void blockHeightTextBox_ValueChanged(object sender, EventArgs e)
         {
-            template.BlockHeight = (int)(blockHeightTextBox.Value);
-            updateField(true);
+            if (!blockControlUpdating)
+            {
+                appState.AddAction(DelegateEnum.ChangeFieldProperties, DelegateEnum.ChangeFieldProperties,
+                new object[] { this, new object[] { 0, 0, 0, (int)(blockHeightTextBox.Value) } }, new object[] { this, new object[] { 0, 0, 0, template.BlockHeight } });
+                template.BlockHeight = (int)(blockHeightTextBox.Value);
+                UpdateField(true);
+            }
         }
 
         private void blockWidthTextBox_ValueChanged(object sender, EventArgs e)
         {
-            template.BlockWidth = (int)(blockWidthTextBox.Value);
-            updateField(true);
+            if (!blockControlUpdating)
+            {
+                appState.AddAction(DelegateEnum.ChangeFieldProperties, DelegateEnum.ChangeFieldProperties,
+                new object[] { this, new object[] { 0, 0, (int)(blockWidthTextBox.Value), 0 } }, new object[] { this, new object[] { 0, 0, template.BlockWidth, 0 } });
+                template.BlockWidth = (int)(blockWidthTextBox.Value);
+                UpdateField(true);
+            }
         }
 
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
@@ -290,19 +345,20 @@ namespace CollageApp
             relocateControls();
         }
 
-        private int margin = 10;
+        private int margin = 2;
 
         private void relocateControls()
         {
-            ImagePreviewPanel.Height = ClientRectangle.Height;
-            MainPanel.SetBounds(margin, margin * 3, ClientRectangle.Width - ImagePreviewPanel.Width - margin * 3, ClientRectangle.Height - margin * 4);
-            imageListBox.SetBounds(templateBox.Location.X, templateBox.Location.Y + templateBox.Height + margin / 2, templateBox.Width, selectFilesButton.Location.Y - (templateBox.Location.Y + templateBox.Height + margin));
-            ImageListView.Height = imageListBox.Height - margin * 2;
+            ImagePreviewPanel.Height = ClientRectangle.Height - (menuStrip.Size.Height + margin * 2) ;
+            MainPanel.SetBounds(margin, menuStrip.Size.Height + margin, ClientRectangle.Width - ImagePreviewPanel.Width - margin * 3, ClientRectangle.Height - menuStrip.Size.Height - margin *2);
+
+            imageListBox.SetBounds(templateBox.Location.X, templateBox.Location.Y + templateBox.Height + margin / 2, templateBox.Width, selectFilesButton.Location.Y - (templateBox.Location.Y + templateBox.Height) - 10);
+            ImageListView.Height = imageListBox.Height - margin * 10;
 
             if (imageProcessor.SelectedImage == null)
                 ThumbnailImageSelectionPanel.Enabled = ThumbnailImageSelectionPanel.Visible = false;
 
-            updateField(true);
+            UpdateField(true);
         }
 
         private void previewPanel_Paint(object sender, PaintEventArgs e)
@@ -314,52 +370,6 @@ namespace CollageApp
             }
 
         }
-
-        private void radioButton1_CheckedChanged(object sender, EventArgs e)
-        {
-            if (imageProcessor.SelectedImage != null && !blockControlUpdating)
-            {
-                imageProcessor.SelectedImage.imageFormatType = ImageFormatType.Stretch;
-                updateField(false);
-            }
-        }
-
-        private void cutTopLeftRadio_CheckedChanged(object sender, EventArgs e)
-        {
-            if (imageProcessor.SelectedImage != null && !blockControlUpdating)
-            {
-                imageProcessor.SelectedImage.imageFormatType = ImageFormatType.CutTopLeft;
-                updateField(false);
-            }
-        }
-
-        private void cutRightBottomRadio_CheckedChanged(object sender, EventArgs e)
-        {
-            if (imageProcessor.SelectedImage != null && !blockControlUpdating)
-            {
-                imageProcessor.SelectedImage.imageFormatType = ImageFormatType.CutBotRight;
-                updateField(false);
-            }
-        }
-
-        private void cutMiddleRadio_CheckedChanged(object sender, EventArgs e)
-        {
-            if (imageProcessor.SelectedImage != null && !blockControlUpdating)
-            {
-                imageProcessor.SelectedImage.imageFormatType = ImageFormatType.CutMiddle;
-                updateField(false);
-            }
-        }
-
-        private void cutCustomRadio_CheckedChanged(object sender, EventArgs e)
-        {
-            if (imageProcessor.SelectedImage != null && !blockControlUpdating)
-            {
-                imageProcessor.SelectedImage.imageFormatType = ImageFormatType.CustomCut;
-                updateField(false);
-            }
-        }
-
         private void сохранитьToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Bitmap Collage = imageProcessor.GetFullCollage(template.TotalCells);
@@ -374,45 +384,9 @@ namespace CollageApp
             }
         }
 
-        private void XCut_ValueChanged(object sender, EventArgs e)
-        {
-            if (imageProcessor.SelectedImage != null && imageProcessor.SelectedImage.imageFormatType == ImageFormatType.CustomCut && !blockControlUpdating)
-            {
-                imageProcessor.SelectedImage.SrcRect.X = (int)XCut.Value;
-                updateField(false);
-            }
-        }
-
-        private void WCut_ValueChanged(object sender, EventArgs e)
-        {
-            if (imageProcessor.SelectedImage != null && imageProcessor.SelectedImage.imageFormatType == ImageFormatType.CustomCut && !blockControlUpdating)
-            {
-                imageProcessor.SelectedImage.SrcRect.Width = (int)WCut.Value;
-                updateField(false);
-            }
-        }
-
-        private void YCut_ValueChanged(object sender, EventArgs e)
-        {
-            if (imageProcessor.SelectedImage != null && imageProcessor.SelectedImage.imageFormatType == ImageFormatType.CustomCut && !blockControlUpdating)
-            {
-                imageProcessor.SelectedImage.SrcRect.Y = (int)YCut.Value;
-                updateField(false);
-            }
-        }
-
-        private void HCut_ValueChanged(object sender, EventArgs e)
-        {
-            if (imageProcessor.SelectedImage != null && imageProcessor.SelectedImage.imageFormatType == ImageFormatType.CustomCut && !blockControlUpdating)
-            {
-                imageProcessor.SelectedImage.SrcRect.Height = (int)HCut.Value;
-                updateField(false);
-            }
-        }
-
         private void ThumbnailImageSelectionPanel_MouseMove(object sender, MouseEventArgs e)
         {
-            if (imageProcessor.SelectedImage != null && imageProcessor.SelectedImage.imageFormatType == ImageFormatType.CustomCut)
+            if (imageProcessor.SelectedImage != null && cutCustomRadio.Checked)
             {
                 if (e.Button == MouseButtons.Left)
                 {
@@ -429,12 +403,113 @@ namespace CollageApp
             ThumbnailImageSelectionPanel.Location = new Point(
                        Math.Min(Math.Max(imageProcessor.SelectedImageRect.X, ThumbnailImageSelectionPanel.Location.X), imageProcessor.SelectedImageRect.X + imageProcessor.SelectedImageRect.Width - ThumbnailImageSelectionPanel.Size.Width),
                        Math.Min(Math.Max(imageProcessor.SelectedImageRect.Y, ThumbnailImageSelectionPanel.Location.Y), imageProcessor.SelectedImageRect.Y + imageProcessor.SelectedImageRect.Height - ThumbnailImageSelectionPanel.Size.Height));
-            
-            imageProcessor.SelectedImage.SrcRect.Location = new Point(
-                Math.Max((int)((ThumbnailImageSelectionPanel.Location.X - previewPanel.ClientRectangle.Width / 2 + imageProcessor.SelectedImage.bitmap.Width * thumbnailMultiplier / 2) / thumbnailMultiplier), 0),
-                Math.Max((int)((ThumbnailImageSelectionPanel.Location.Y - previewPanel.ClientRectangle.Height / 2 + imageProcessor.SelectedImage.bitmap.Height * thumbnailMultiplier / 2) /  thumbnailMultiplier), 0));
 
-            updateField(false);
+            XCut.Value = Math.Max((int)((ThumbnailImageSelectionPanel.Location.X - previewPanel.ClientRectangle.Width / 2 + imageProcessor.SelectedImage.bitmap.Width * thumbnailMultiplier / 2) / thumbnailMultiplier), 0);
+            YCut.Value = Math.Max((int)((ThumbnailImageSelectionPanel.Location.Y - previewPanel.ClientRectangle.Height / 2 + imageProcessor.SelectedImage.bitmap.Height * thumbnailMultiplier / 2) /  thumbnailMultiplier), 0);
+        }
+
+        private void CloseApp()
+        {
+            Close();
+        }
+
+        private void выходToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CloseApp();
+        }
+
+        private void ImageApplyButton_Click(object sender, EventArgs e)
+        {
+            if (SelectedImage != null)
+            {
+                ImageFormatType imageFormatType = radioButtonAssociations[formattingBox.Controls.OfType<RadioButton>().FirstOrDefault(r => r.Checked)];
+                RectangleF rect = new RectangleF((int)XCut.Value, (int)YCut.Value, (int)WCut.Value, (int)HCut.Value);
+
+                appState.AddAction(DelegateEnum.ChangeImageProperties, DelegateEnum.ChangeImageProperties,
+                    new object[] { this, SelectedImage, rect, imageFormatType }, new object[] { this, SelectedImage, SelectedImage.SrcRect, SelectedImage.imageFormatType });
+
+                imageProcessor.ChangeImageProperties(SelectedImage, rect, imageFormatType);
+
+                UpdateField(false);
+            }
+        }
+
+        private void cutTopLeftRadio_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!blockControlUpdating)
+                updateSelectionRect();
+        }
+
+        private void cutRightBottomRadio_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!blockControlUpdating)
+                updateSelectionRect();
+        }
+
+        private void cutMiddleRadio_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!blockControlUpdating)
+                updateSelectionRect();
+        }
+
+        private void cutCustomRadio_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!blockControlUpdating)
+                updateSelectionRect();
+        }
+
+        private void XCut_ValueChanged(object sender, EventArgs e)
+        {
+            if (!blockControlUpdating)
+                updateSelectionRect();
+        }
+
+        private void WCut_ValueChanged(object sender, EventArgs e)
+        {
+            if (!blockControlUpdating)
+                updateSelectionRect();
+        }
+
+        private void YCut_ValueChanged(object sender, EventArgs e)
+        {
+            if (!blockControlUpdating)
+                updateSelectionRect();
+        }
+
+        private void HCut_ValueChanged(object sender, EventArgs e)
+        {
+            if (!blockControlUpdating)
+                updateSelectionRect();
+        }
+
+        private void MainForm_KeyPress(object sender, KeyPressEventArgs e)
+        {
+
+        }
+
+        private void UpdateTemplate()
+        {
+            blockControlUpdating = true;
+            blockWidthTextBox.Value = template.BlockWidth;
+            blockHeightTextBox.Value = template.BlockHeight;
+            rowsTextBox.Value = template.Rows;
+            columnsTextBox.Value = template.Columns;
+            blockControlUpdating = false;
+        }
+
+        private void MainForm_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Z && e.Modifiers == Keys.Control) {
+                appState.UndoAction();
+                UpdateTemplate();
+                UpdateField(true);
+            }
+            else if (e.KeyCode == Keys.Y && e.Modifiers == Keys.Control)
+            {
+                appState.LoadAction();
+                UpdateTemplate();
+                UpdateField(true);
+            }
         }
     }
 }
