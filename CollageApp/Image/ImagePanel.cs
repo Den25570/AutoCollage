@@ -9,9 +9,12 @@ namespace CollageApp.Image
 {
     public class ImagePanel : Panel
     {
-        public ImagePanel()
+        public ImageInfo AssociatedImage;
+
+        public ImagePanel(ImageInfo associatedImage)
         {
             DoubleBuffered = true;
+            AssociatedImage = associatedImage;
         }
     }
 }

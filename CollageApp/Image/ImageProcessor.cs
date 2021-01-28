@@ -1,4 +1,5 @@
 ﻿using CollageApp.Image;
+using CollageApp.Templates;
 using log4net;
 using System;
 using System.Collections.Generic;
@@ -18,46 +19,53 @@ namespace CollageApp
 
         public List<ImageInfo> Images;
         public Bitmap Collage;
-        public int Width;
-        public int Height;
         public float Multiplier;
 
         public ImageInfo SelectedImage;
+        public int SelectedIndex { get; private set; }
         public Rectangle SelectedImageRect { get; private set; }
 
         private ILog log;
+        private LinearTemplate template;
 
-        public ImageProcessor(ILog log)
+        //color
+        public Brush BackgroundBrush = new SolidBrush(Color.Transparent);
+
+        public ImageProcessor(ILog log, LinearTemplate template)
         {
             Images = new List<ImageInfo>();
             this.log = log;
+            this.template = template;
         }   
+
+        public void DrawTemplateBackground(Graphics graphics)
+        {
+            float width = template.Columns * (template.BlockWidth + template.LeftMargin) * template.Multiplier - template.LeftMargin * template.Multiplier;
+            float height = template.Rows * (template.BlockHeight + template.BottomMargin) * template.Multiplier - template.BottomMargin * template.Multiplier;
+            graphics.FillRectangle(BackgroundBrush, 0, 0, width, height);
+        }
 
         public Bitmap GetFullCollage(int maxImages)
         {
-            Collage = new Bitmap(Width, Height);
+            int width = template.Columns * (template.BlockWidth + template.LeftMargin) - template.LeftMargin;
+            int height = template.Rows * (template.BlockHeight + template.BottomMargin) - template.BottomMargin;
+
+            Collage = new Bitmap(width, height);
             Graphics collageGraphics = Graphics.FromImage(Collage);
+            collageGraphics.FillRectangle(BackgroundBrush, 0, 0, Collage.Width, Collage.Height);
 
             for (int i = 0; i < Images.Count && i < maxImages; i++)
             {
                 ImageInfo image = Images[i];
-                collageGraphics.DrawImage(image.bitmap, image.OriginalRect, image.SrcRect, GraphicsUnit.Pixel);
+
+                RectangleF destRectangle = new RectangleF(image.OriginalRect.X + image.OriginalRectangleShift.X, image.OriginalRect.Y + image.OriginalRectangleShift.Y, image.OriginalRect.Width, image.OriginalRect.Height);
+
+                if (!image.IsHidden && image.Visible)
+                    collageGraphics.DrawImage(image.bitmap, destRectangle, image.SrcRect, GraphicsUnit.Pixel);
+                else maxImages++;
             }
 
             return Collage;
-        }
-
-        public void DrawSavedCollage(Graphics graphics)
-        {
-            graphics.DrawImage(Collage, 0, 0, Width * Multiplier, Height * Multiplier);
-        }
-
-        internal void DrawSelectedImage(Graphics graphics)
-        {
-            if (SelectedImage != null)
-            {
-                graphics.DrawImage(SelectedImage.bitmap, SelectedImage.Rect, SelectedImage.SrcRect, GraphicsUnit.Pixel);
-            }
         }
 
         public void RenderPreview(Graphics graphics, Rectangle originalRect)
@@ -71,21 +79,13 @@ namespace CollageApp
 
         public void SelectImage(ImagePanel panel)
         {
-            Images.ForEach(image => image.isSelected = false); 
-            
-            SelectedImage = Images.Find(image => image.ImagePanel == panel);
-            SelectedImage.isSelected = true;
-        }
-
-        public void SelectImage(int index)
-        {
-            Images.ForEach(image => image.isSelected = false);
-
-            if ((index >= 0) && (index < Images.Count))
-            {
-                SelectedImage = Images[index];
-                SelectedImage.isSelected = true;
+            if (SelectedImage != null) {
+                SelectedImage.isSelected = false;
             }
+            SelectedImage = panel.AssociatedImage;
+            SelectedIndex = SelectedImage.Index;
+
+            SelectedImage.isSelected = true;
         }
 
         public void UnSelectImage()
@@ -100,7 +100,7 @@ namespace CollageApp
             {
                 if (index < Images.Count)
                 {
-                    int selectedIndex = Images.FindIndex(image => image.Name == SelectedImage.Name);
+                    int selectedIndex = SelectedImage.Index;
 
                     if (index == selectedIndex)
                         return true;
@@ -113,15 +113,27 @@ namespace CollageApp
 
         public void SwapImages(int index1, int index2)
         {
+            Images[index1].Index = index2;
+            Images[index2].Index = index1;
             ImageInfo temp = Images[index1];
             Images[index1] = Images[index2];
             Images[index2] = temp;
         }
 
-        public void ChangeImageProperties(ImageInfo image, RectangleF srcRect, ImageFormatType imageFormatType)
+        public void ChangeImageProperties(ImageInfo image, RectangleF srcRect, ImageFormatType imageFormatType, Boolean isHidden)
         {
             image.SrcRect = srcRect;
             image.imageFormatType = imageFormatType;
+            image.IsHidden = isHidden;
+
+            if (!isHidden)
+            {
+                image.ImagePanel.Show();
+            }
+            else
+            {
+                image.ImagePanel.Hide();
+            }
         }
 
         public void LoadAllImages(IEnumerable<string> paths)

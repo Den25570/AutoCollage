@@ -23,24 +23,30 @@ namespace CollageApp
     {
         //
         public RectangleF OriginalRect;
+        public Point OriginalRectangleShift;
         public RectangleF Rect;
         public string Name;
         public Bitmap bitmap;
-        public ImagePanel ImagePanel = new ImagePanel();
+        public ImagePanel ImagePanel = null;
         private Pen selectionPen = new Pen(Color.Blue, 4);
 
         //
         public RectangleF SrcRect;
-        public ImageFormatType imageFormatType;
+        public ImageFormatType imageFormatType = ImageFormatType.CutMiddle;
+        public Boolean Visible = true;
+        public Boolean IsHidden = false;
 
         //
         public bool isSelected = false;
+        public int Index;
 
         public ImageInfo(string path, int index)
         {
             try
             {
+                ImagePanel = new ImagePanel(this);
                 bitmap = new Bitmap(path);
+                Index = index;
 
                 ImagePanel.Visible = true;
                 ImagePanel.BackColor = System.Drawing.SystemColors.AppWorkspace;
@@ -54,14 +60,16 @@ namespace CollageApp
             }
 
             Name = Path.GetFileName(path);
-            
-            imageFormatType = ImageFormatType.CutTopLeft;
         }
         private void panel_Paint(object sender, PaintEventArgs e)
         {
-            e.Graphics.DrawImage(bitmap, (sender as Panel).ClientRectangle, SrcRect, GraphicsUnit.Pixel);
-            if (isSelected)
-                e.Graphics.DrawRectangle(selectionPen, (sender as Panel).ClientRectangle);
+            ImagePanel.Visible = Visible && !IsHidden;
+            if (Visible && !IsHidden)
+            {
+                e.Graphics.DrawImage(bitmap, (sender as Panel).ClientRectangle, SrcRect, GraphicsUnit.Pixel);
+                if (isSelected)
+                    e.Graphics.DrawRectangle(selectionPen, (sender as Panel).ClientRectangle);
+            }           
         }
 
         public void CalculateSrcRect()

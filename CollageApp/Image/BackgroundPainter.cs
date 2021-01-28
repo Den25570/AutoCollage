@@ -7,10 +7,26 @@ using System.Threading.Tasks;
 
 namespace CollageApp
 {
-    public static class TilePainter
+    public static class BackgroundPainter
     {
         private static SolidBrush lightSolidBrush = new SolidBrush(Color.FromArgb(255, 255, 255));
         private static SolidBrush darkSolidBrush = new SolidBrush(Color.FromArgb(238, 238, 238));
+
+        public static void DrawBackground(Graphics graphics, Rectangle rect, Color backgroundColor)
+        {
+            if (backgroundColor.A == 0)
+            {
+                DrawTiles(graphics, rect, 20);
+            }
+            else
+            {
+                using (Brush brush = new SolidBrush(backgroundColor))
+                {
+                    graphics.FillRectangle(brush, rect);
+                }           
+            }
+        }
+
         public static void DrawTiles(Graphics graphics, Rectangle rect, int tileSize)
         {
             SolidBrush currBrush;

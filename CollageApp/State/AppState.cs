@@ -100,8 +100,9 @@ namespace CollageApp.State
             ImageInfo image = (objects[1] as ImageInfo);
             RectangleF srcRect = (RectangleF)objects[2];
             ImageFormatType imageFormatType = (ImageFormatType)objects[3];
+            Boolean isHidden = (Boolean)objects[4];
 
-            form.imageProcessor.ChangeImageProperties(image, srcRect, imageFormatType);
+            form.imageProcessor.ChangeImageProperties(image, srcRect, imageFormatType, isHidden);
         }
         public static void ChangeFieldProperties(object[] objects)
         {
