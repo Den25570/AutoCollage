@@ -179,7 +179,7 @@ namespace CollageApp
             imageProcessor.SelectedImage = null;
             ThumbnailImageSelectionPanel.Enabled = ThumbnailImageSelectionPanel.Visible = false;
 
-            appState.AddAction(DelegateEnum.LoadImages, DelegateEnum.UnloadImages, new object[]{ this, filenames }, new object[] { this });
+            //appState.AddAction(DelegateEnum.LoadImages, DelegateEnum.UnloadImages, new object[]{ this, filenames }, new object[] { this });
 
             MainPanel.Invalidate();
         }
@@ -188,20 +188,22 @@ namespace CollageApp
         {
             if (e.Button == MouseButtons.Left)
             {
-                //
+                //Prepare
                 SelectImage(sender);
 
-                //
+                //Move
                 ReleaseCapture();
                 SendMessage((sender as Control).Handle, WM_NCLBUTTONDOWN, HT_CAPTION, 0);
 
-                //
-                int selectedIndex = imageProcessor.Images.FindIndex(image => image.Name == SelectedImage.Name);
+                //Act
+                int selectedIndex = SelectedImage.Index;
                 int placedIndex = template.GetBlockIndex(new Point(e.Location.X + (sender as Control).Location.X, e.Location.Y + (sender as Control).Location.Y));
                 SwapImageNames(selectedIndex, placedIndex);
+                appState.AddAction(DelegateEnum.ChangeImagePos, DelegateEnum.ChangeImagePos, new object[] {this, selectedIndex, placedIndex }, new object[] {this, placedIndex, selectedIndex });
+
                 imageProcessor.PlaceImage(placedIndex);
                 template.RearrangeImagesAccordingToTemplate(imageProcessor.Images, MainPanel.ClientRectangle);
-              //  UpdateField(true);
+                //UpdateField(true);
             }
         }
 
@@ -598,6 +600,8 @@ namespace CollageApp
         {
             blockControlUpdating = true;
 
+            template.RearrangeImagesAccordingToTemplate(imageProcessor.Images, MainPanel.ClientRectangle);
+
             blockWidthTextBox.Value = template.BlockWidth;
             blockHeightTextBox.Value = template.BlockHeight;
 
@@ -605,7 +609,7 @@ namespace CollageApp
             columnsTextBox.Value = template.Columns;
 
             leftMarginEdit.Value = template.LeftMargin;
-            bottomMarginEdit.Value = template.BottomMargin;
+            bottomMarginEdit.Value = template.BottomMargin;         
 
             blockControlUpdating = false;
         }
